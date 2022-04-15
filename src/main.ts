@@ -8,12 +8,12 @@ async function bootstrap() {
   await app.listen(3000);
 
   cron.schedule('* * * * *', async () => {
-    console.log('CRON INICIADO')
+    console.log(`CRON INICIADO ${new Date().toLocaleString("en-US", {timeZone: "America/Sao_Paulo"})}`)
 
     let daft = new DaftService()
     await daft.start()
     
-    console.log('CRON FINALIZADO')
+    console.log(`CRON FINALIZADO ${new Date().toLocaleString("en-US", {timeZone: "America/Sao_Paulo"})}`)
   })
 
 }
