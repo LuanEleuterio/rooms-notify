@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 const puppeteer = require('puppeteer');
 
 @Injectable()
-export class DaftService {
+export class RoomsService {
 
     async start(): Promise<void> {
        await this.getRooms()
