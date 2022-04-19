@@ -1,7 +1,9 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { RoomsService } from './services/puppeteer/vendor/daft.vendor';
-import { PuppeteerService } from './services/puppeteer/interface';
+import { PuppeteerService } from './services/puppeteer/interface.service';
+import { TelegramService } from'./services/telegram/telegram.service'
+
+require('dotenv').config({ path: `../${process.env.NODE_ENV}.env` });
 const cron = require('node-cron')
 
 async function bootstrap() {
@@ -11,13 +13,15 @@ async function bootstrap() {
   cron.schedule('* * * * *', async () => {
     console.log(`CRON INICIADO ${new Date().toLocaleString("en-US", {timeZone: "America/Sao_Paulo"})}`)
 
-    let roomInterface = new PuppeteerService()
+    // let telegram = new TelegramService()
 
-    await roomInterface.start('daft')
+    // await telegram.sendMessage("Ola Luan")
 
-    // let daft = new DaftService()
-    // await daft.start()
-    
+    let puppeteerService = new PuppeteerService()
+
+    await puppeteerService.start('daft')
+
+
     console.log(`CRON FINALIZADO ${new Date().toLocaleString("en-US", {timeZone: "America/Sao_Paulo"})}`)
   })
 
