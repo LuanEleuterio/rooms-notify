@@ -1,19 +1,37 @@
 import { Injectable } from '@nestjs/common';
+import { url } from 'inspector';
+import { TelegramHelper } from 'src/helpers/telegram.helper';
+import { TelegramService } from 'src/services/telegram/telegram.service';
+
 const puppeteer = require('puppeteer');
 
 @Injectable()
 export class RoomsService {
 
+    private readonly telegramHelper = new TelegramHelper()
+    private readonly telegramService = new TelegramService()
+
     async start(): Promise<void> {
-       await this.getRooms()
+       let roomInformation = await this.getRooms()
+
+       let roomInformationMsg = this.telegramHelper.formatMessage(roomInformation)
+
+       await this.telegramService.sendMessage(roomInformationMsg)
     }
 
-    async getRooms(): Promise<void>{
+    async getRooms(): Promise<any>{
 
         // const browser = await puppeteer.launch({ headless: false})
-        const browser = await puppeteer.launch()
+        const browser = await puppeteer.launch({
+            handless: true,
+            args: [
+                "--no-sandbox",
+                "--disable-setuid-sandbox"
+            ]
+        })
+
         const page = await browser.newPage()
-        page.setViewport({ width: 1080, height: 720 });
+        //page.setViewport({ width: 1080, height: 720 });
     
         const urlBase = 'https://daft.ie/sharing'
     
@@ -34,9 +52,11 @@ export class RoomsService {
     
         let listUrlRooms = await this.getListUrlRooms(page)
     
-        await this.getRoomInformation(page, listUrlRooms)
-    
+        let roomsInformations = await this.getRoomInformation(page, listUrlRooms)
+        
         await browser.close();
+
+        return roomsInformations
     }
 
     async getListUrlRooms(page: any): Promise<Array<string>> {
@@ -46,10 +66,12 @@ export class RoomsService {
         let roomsUrl = []
         for(let room of listRooms) roomsUrl = [...roomsUrl, await room.evaluate(el => el.childNodes[0].href)]
 
-        return roomsUrl
+        return [roomsUrl[3]]
     }
 
-    async getRoomInformation(page: any, urlRooms: Array<string> ): Promise<void> {
+    async getRoomInformation(page: any, urlRooms: Array<string> ): Promise<any> {
+        let obj: any = {}
+
         for(let urlRoom of urlRooms) {
             // Desenvolver depois uma solução para acomodações estudantis
             if( urlRoom.includes("student-ac") ) continue
@@ -79,7 +101,13 @@ export class RoomsService {
             console.log(roomOwner)
             console.log(roomOwnerNumber)
             console.log(roomValue)
+
+            obj.url = urlRoom
+            obj.owner = roomOwner
+            obj.price = roomValue
         }
+
+        return obj
     }
 
     genQueryString(field: string, locations: Array<string> ): string{
