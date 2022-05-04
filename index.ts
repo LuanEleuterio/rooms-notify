@@ -45,14 +45,14 @@ async function getRoomInformation(page, urlRooms){
       let roomValue = await page.waitForSelector('.TitleBlock__StyledSpan-sc-1avkvav-5.fKAzIL')
       roomValue = await roomValue.evaluate(el => el.textContent)
 
-      let roomDescription = await page.waitForSelector('.PropertyPage__StandardParagraph-sc-14jmnho-8.iDlZoD', el => el.textContent)
+      let roomDescription = await page.waitForSelector('.styles__StandardParagraph-sc-15fxapi-8.eMCuSm', el => el.textContent)
       roomDescription = await roomDescription.evaluate(el => el.textContent)
 
       let propertyAttributes = []
-      let propertyOverview = await page.$$('.PropertyPage__ListLabel-sc-14jmnho-10')
+      let propertyOverview = await page.$$('.styles__ListLabel-sc-15fxapi-10.dDvqlf')
       for(let property of propertyOverview) propertyAttributes = [...propertyAttributes, await property.evaluate(el => el.parentNode.outerText)]
           
-      let roomOwner = await page.waitForSelector('.ContactPanel__ImageLabel-sc-18zt6u1-6.laVxzi')
+      let roomOwner = await page.waitForSelector('.styles__BoldText-axh9yj-5.eiBWND')
       roomOwner = await roomOwner.evaluate(el => el.textContent)
 
       let roomOwnerNumber = await page.$$('.NumberReveal__PhoneNumber-v2noxr-0.cLhApw')

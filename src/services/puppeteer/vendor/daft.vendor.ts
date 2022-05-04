@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { url } from 'inspector';
 import { TelegramHelper } from 'src/helpers/telegram.helper';
 import { TelegramService } from 'src/services/telegram/telegram.service';
@@ -8,6 +8,10 @@ const puppeteer = require('puppeteer');
 @Injectable()
 export class RoomsService {
 
+    // constructor(
+    //     @Inject('TelegramService') telegramService: TelegramService
+    // ){}
+
     private readonly telegramHelper = new TelegramHelper()
     private readonly telegramService = new TelegramService()
 
@@ -15,23 +19,22 @@ export class RoomsService {
        let roomInformation = await this.getRooms()
 
        let roomInformationMsg = this.telegramHelper.formatMessage(roomInformation)
-
        await this.telegramService.sendMessage(roomInformationMsg)
     }
 
     async getRooms(): Promise<any>{
-
+    
         // const browser = await puppeteer.launch({ headless: false})
         const browser = await puppeteer.launch({
-            handless: true,
+            handless: false,
             args: [
                 "--no-sandbox",
                 "--disable-setuid-sandbox"
             ]
         })
-
+        
         const page = await browser.newPage()
-        //page.setViewport({ width: 1080, height: 720 });
+        page.setViewport({ width: 1080, height: 720 });
     
         const urlBase = 'https://daft.ie/sharing'
     
@@ -84,14 +87,14 @@ export class RoomsService {
             let roomValue = await page.waitForSelector('.TitleBlock__StyledSpan-sc-1avkvav-5.fKAzIL')
             roomValue = await roomValue.evaluate(el => el.textContent)
 
-            let roomDescription = await page.waitForSelector('.PropertyPage__StandardParagraph-sc-14jmnho-8.iDlZoD', el => el.textContent)
+            let roomDescription = await page.waitForSelector('.styles__StandardParagraph-sc-15fxapi-8.eMCuSm', el => el.textContent)
             roomDescription = await roomDescription.evaluate(el => el.textContent)
 
             let propertyAttributes = []
-            let propertyOverview = await page.$$('.PropertyPage__ListLabel-sc-14jmnho-10')
+            let propertyOverview = await page.$$('.styles__ListLabel-sc-15fxapi-10.dDvqlf')
             for(let property of propertyOverview) propertyAttributes = [...propertyAttributes, await property.evaluate(el => el.parentNode.outerText)]
                 
-            let roomOwner = await page.waitForSelector('.ContactPanel__ImageLabel-sc-18zt6u1-6.laVxzi')
+            let roomOwner = await page.waitForSelector('.styles__ImageLabel-sc-15uwzs5-6.boRqb')
             roomOwner = await roomOwner.evaluate(el => el.textContent)
 
             let roomOwnerNumber = await page.$$('.NumberReveal__PhoneNumber-v2noxr-0.cLhApw')
